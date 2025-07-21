@@ -1,0 +1,12 @@
+# Sync Gradle
+```
+cd android
+./gradlew build --refresh-dependencies
+```
+It does 2 things:
+1. Build the project
+2. Force Gradle to re-check and re-download dependencies
+
+
+# Clean Gradle
+cd android && ./gradlew clean

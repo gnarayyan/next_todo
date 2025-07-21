@@ -71,8 +71,8 @@ class NotificationService {
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
 
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      // uiLocalNotificationDateInterpretation:
+      //     UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -185,8 +185,9 @@ class NotificationService {
       tz.TZDateTime.from(scheduledDate, nepalLocation),
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+
+      // uiLocalNotificationDateInterpretation:
+      //     UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
     );
   }
