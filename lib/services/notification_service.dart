@@ -70,8 +70,8 @@ class NotificationService {
       'Don\'t forget: ${task.title}',
       tz.TZDateTime.from(reminderTime, nepalLocation),
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.,
-      androidAllowWhileIdle: true,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
@@ -185,7 +185,7 @@ class NotificationService {
       'Start your day with purpose! 🌟',
       tz.TZDateTime.from(scheduledDate, nepalLocation),
       notificationDetails,
-      androidAllowWhileIdle: true,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
