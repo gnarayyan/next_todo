@@ -111,7 +111,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       fontWeight: FontWeight.bold,
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.6),
+                      ).colorScheme.onSurface.withAlpha((0.6 * 255).toInt()),
                     ),
                   ),
                 ),
@@ -199,9 +199,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ? Theme.of(context).colorScheme.onPrimary
                           : isCurrentMonth
                           ? Theme.of(context).colorScheme.onSurface
-                          : Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withOpacity(0.4),
+                          : Theme.of(context).colorScheme.onSurface.withAlpha(
+                              (0.4 * 255).toInt(),
+                            ),
                       fontWeight: isSelected || isToday
                           ? FontWeight.bold
                           : null,
@@ -258,9 +258,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 Icon(
                                   Icons.event_available,
                                   size: 64,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withAlpha((0.3 * 255).toInt()),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
@@ -270,7 +269,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onSurface
-                                            .withOpacity(0.6),
+                                            .withAlpha((0.6 * 255).toInt()),
                                       ),
                                 ),
                               ],

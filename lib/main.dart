@@ -140,9 +140,8 @@ class _SplashScreenState extends State<SplashScreen>
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
                             BoxShadow(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.3),
+                              color: Theme.of(context).colorScheme.primary
+                                  .withAlpha((0.3 * 255).toInt()),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -168,9 +167,8 @@ class _SplashScreenState extends State<SplashScreen>
                         'Next generation todo app',
                         style: GoogleFonts.inter(
                           fontSize: 16,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withOpacity(0.7),
+                          color: Theme.of(context).colorScheme.onSurface
+                              .withAlpha((0.7 * 255).toInt()),
                         ),
                       ),
                       const SizedBox(height: 48),

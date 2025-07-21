@@ -301,7 +301,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                   priority.name,
                                   isDark: themeProvider.isDarkMode,
                                 )
-                              : Theme.of(context).colorScheme.surfaceVariant,
+                              : Theme.of(context).colorScheme.onSurface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: themeProvider.getPriorityColor(

@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   BoxShadow(
                     color: Theme.of(
                       context,
-                    ).colorScheme.primary.withOpacity(0.3),
+                    ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Text(
                     'You have ${stats['pending']} pending tasks',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withAlpha((0.9 * 255).toInt()),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withAlpha((0.2 * 255).toInt()),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withAlpha((0.9 * 255).toInt()),
                 fontSize: 12,
               ),
             ),
@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       labelColor: Theme.of(context).colorScheme.primary,
       unselectedLabelColor: Theme.of(
         context,
-      ).colorScheme.onSurface.withOpacity(0.7),
+      ).colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
       tabs: const [
         Tab(text: 'Today'),
         Tab(text: 'All'),

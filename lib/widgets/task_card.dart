@@ -88,7 +88,9 @@ class TaskCard extends StatelessWidget {
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
         decoration: task.isCompleted ? TextDecoration.lineThrough : null,
         color: task.isCompleted
-            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+            ? Theme.of(
+                context,
+              ).colorScheme.onSurface.withAlpha((0.6 * 255).toInt())
             : null,
         fontWeight: FontWeight.w600,
       ),
@@ -105,7 +107,9 @@ class TaskCard extends StatelessWidget {
         Text(
           task.description!,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

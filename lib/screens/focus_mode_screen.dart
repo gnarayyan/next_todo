@@ -120,7 +120,9 @@ class _FocusModeScreenState extends State<FocusModeScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -145,7 +147,7 @@ class _FocusModeScreenState extends State<FocusModeScreen>
           Text(
             'Select your most important tasks and focus on them without distractions',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withAlpha((0.9 * 255).toInt()),
             ),
             textAlign: TextAlign.center,
           ),
@@ -248,18 +250,16 @@ class _FocusModeScreenState extends State<FocusModeScreen>
                         Icon(
                           Icons.star_border,
                           size: 64,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.onSurface
+                              .withAlpha((0.3 * 255).toInt()),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No focus tasks yet',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface
+                                    .withAlpha((0.6 * 255).toInt()),
                               ),
                         ),
                         const SizedBox(height: 8),
@@ -267,9 +267,8 @@ class _FocusModeScreenState extends State<FocusModeScreen>
                           'Star tasks from your task list to add them to focus mode',
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withOpacity(0.5),
+                                color: Theme.of(context).colorScheme.onSurface
+                                    .withAlpha((0.5 * 255).toInt()),
                               ),
                           textAlign: TextAlign.center,
                         ),
@@ -347,8 +346,8 @@ class _FocusModeScreenState extends State<FocusModeScreen>
             gradient: Provider.of<ThemeProvider>(context).primaryGradient,
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withOpacity(
-                  0.3 + (_pulseController.value * 0.2),
+                color: Theme.of(context).colorScheme.primary.withAlpha(
+                  ((0.3 + (_pulseController.value * 0.2)) * 255).toInt(),
                 ),
                 blurRadius: 20 + (_pulseController.value * 10),
                 spreadRadius: 5 + (_pulseController.value * 5),
@@ -370,7 +369,7 @@ class _FocusModeScreenState extends State<FocusModeScreen>
                 Text(
                   'Focus Time',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withAlpha((0.9 * 255).toInt()),
                   ),
                 ),
               ],

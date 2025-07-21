@@ -114,8 +114,8 @@ class ThemeProvider extends ChangeNotifier {
   LinearGradient get primaryGradient => LinearGradient(
     colors: _isDarkMode
         ? [
-            const Color(0xFF6750A4).withOpacity(0.8),
-            const Color(0xFF9C27B0).withOpacity(0.8),
+            const Color(0xFF6750A4).withAlpha((0.8 * 255).toInt()),
+            const Color(0xFF9C27B0).withAlpha((0.8 * 255).toInt()),
           ]
         : [const Color(0xFF6750A4), const Color(0xFF9C27B0)],
     begin: Alignment.topLeft,

@@ -36,7 +36,7 @@ class EmptyStateWidget extends StatelessWidget {
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
                       colors: themeProvider.primaryGradient.colors
-                          .map((color) => color.withOpacity(0.3))
+                          .map((color) => color.withAlpha((0.3 * 255).toInt()))
                           .toList(),
                       begin: themeProvider.primaryGradient.begin,
                       end: themeProvider.primaryGradient.end,
@@ -53,7 +53,7 @@ class EmptyStateWidget extends StatelessWidget {
                 .then()
                 .shimmer(
                   duration: 1500.ms,
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withAlpha((0.3 * 255).toInt()),
                 ),
 
             const SizedBox(height: 32),
@@ -77,7 +77,7 @@ class EmptyStateWidget extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.7),
+                    ).colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
                   ),
                   textAlign: TextAlign.center,
                 )
@@ -132,10 +132,12 @@ class EmptyStateWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(
               context,
-            ).colorScheme.surfaceVariant.withOpacity(0.3),
+            ).colorScheme.surface.withAlpha((0.3 * 255).toInt()),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              color: Theme.of(
+                context,
+              ).colorScheme.outline.withAlpha((0.2 * 255).toInt()),
             ),
           ),
           child: Row(
@@ -153,7 +155,7 @@ class EmptyStateWidget extends StatelessWidget {
                     fontStyle: FontStyle.italic,
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.8),
+                    ).colorScheme.onSurface.withAlpha((0.8 * 255).toInt()),
                   ),
                   textAlign: TextAlign.center,
                 ),

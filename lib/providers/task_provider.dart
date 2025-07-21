@@ -6,7 +6,7 @@ import '../services/notification_service.dart';
 
 class TaskProvider extends ChangeNotifier {
   List<Task> _tasks = [];
-  List<Task> _recentlyDeleted = [];
+  final List<Task> _recentlyDeleted = [];
   TaskFilter _currentFilter = TaskFilter.today;
   String _searchQuery = '';
 
