@@ -182,7 +182,9 @@ class _FocusModeScreenState extends State<FocusModeScreen>
                         decoration: BoxDecoration(
                           color: isSelected
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.surfaceVariant,
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -358,7 +360,7 @@ class _FocusModeScreenState extends State<FocusModeScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${_focusTimeMinutes}:00',
+                  '$_focusTimeMinutes:00',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
