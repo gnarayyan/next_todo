@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../providers/theme_provider.dart';
+import '../blocs/blocs.dart';
 import '../services/database_service.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -9,33 +9,35 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: Provider.of<ThemeProvider>(context).backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildAppBar(context),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    _buildAppearanceSection(context),
-                    const SizedBox(height: 20),
-                    _buildLanguageSection(context),
-                    const SizedBox(height: 20),
-                    _buildNotificationSection(context),
-                    const SizedBox(height: 20),
-                    _buildAboutSection(context),
-                  ],
-                ),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(gradient: themeState.backgroundGradient),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildAppBar(context),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        _buildAppearanceSection(context),
+                        const SizedBox(height: 20),
+                        _buildLanguageSection(context),
+                        const SizedBox(height: 20),
+                        _buildNotificationSection(context),
+                        const SizedBox(height: 20),
+                        _buildAboutSection(context),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -61,8 +63,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildAppearanceSection(BuildContext context) {
-    return Consumer<ThemeProvider>(
-          builder: (context, themeProvider, child) {
+    return BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, themeState) {
             return Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,10 +102,11 @@ class SettingsScreen extends StatelessWidget {
                     subtitle: const Text(
                       'Switch between light and dark themes',
                     ),
-                    value: themeProvider.isDarkMode,
-                    onChanged: (value) => themeProvider.toggleTheme(),
+                    value: themeState.isDarkMode,
+                    onChanged: (value) =>
+                        context.read<ThemeBloc>().add(ToggleTheme()),
                     secondary: Icon(
-                      themeProvider.isDarkMode
+                      themeState.isDarkMode
                           ? Icons.dark_mode
                           : Icons.light_mode,
                     ),
@@ -119,8 +122,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildLanguageSection(BuildContext context) {
-    return Consumer<ThemeProvider>(
-          builder: (context, themeProvider, child) {
+    return BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, themeState) {
             return Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,10 +159,10 @@ class SettingsScreen extends StatelessWidget {
                   ListTile(
                     title: const Text('App Language'),
                     subtitle: Text(
-                      _getLanguageName(themeProvider.selectedLanguage),
+                      _getLanguageName(themeState.selectedLanguage),
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () => _showLanguageDialog(context, themeProvider),
+                    onTap: () => _showLanguageDialog(context, themeState),
                   ),
                 ],
               ),
@@ -315,7 +318,7 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  void _showLanguageDialog(BuildContext context, ThemeProvider themeProvider) {
+  void _showLanguageDialog(BuildContext context, ThemeState themeState) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -326,10 +329,10 @@ class SettingsScreen extends StatelessWidget {
             RadioListTile<String>(
               title: const Text('English'),
               value: 'en',
-              groupValue: themeProvider.selectedLanguage,
+              groupValue: themeState.selectedLanguage,
               onChanged: (value) {
                 if (value != null) {
-                  themeProvider.setLanguage(value);
+                  context.read<ThemeBloc>().add(SetLanguage(value));
                   Navigator.pop(context);
                 }
               },
@@ -337,10 +340,10 @@ class SettingsScreen extends StatelessWidget {
             RadioListTile<String>(
               title: const Text('नेपाली (Nepali)'),
               value: 'ne',
-              groupValue: themeProvider.selectedLanguage,
+              groupValue: themeState.selectedLanguage,
               onChanged: (value) {
                 if (value != null) {
-                  themeProvider.setLanguage(value);
+                  context.read<ThemeBloc>().add(SetLanguage(value));
                   Navigator.pop(context);
                 }
               },
@@ -366,7 +369,7 @@ class SettingsScreen extends StatelessWidget {
         width: 64,
         height: 64,
         decoration: BoxDecoration(
-          gradient: Provider.of<ThemeProvider>(context).primaryGradient,
+          gradient: context.read<ThemeBloc>().state.primaryGradient,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Icon(Icons.task_alt, color: Colors.white, size: 32),

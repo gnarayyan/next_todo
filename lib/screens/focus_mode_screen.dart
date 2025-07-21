@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../providers/theme_provider.dart';
-import '../providers/task_provider.dart';
+import '../blocs/blocs.dart';
 import '../widgets/task_card.dart';
 
 class FocusModeScreen extends StatefulWidget {
@@ -42,22 +41,26 @@ class _FocusModeScreenState extends State<FocusModeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: Provider.of<ThemeProvider>(context).backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildAppBar(),
-              Expanded(
-                child: _isFocusMode ? _buildFocusSession() : _buildFocusSetup(),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(gradient: themeState.backgroundGradient),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  Expanded(
+                    child: _isFocusMode
+                        ? _buildFocusSession()
+                        : _buildFocusSetup(),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -90,9 +93,11 @@ class _FocusModeScreenState extends State<FocusModeScreen>
   }
 
   Widget _buildFocusSetup() {
-    return Consumer<TaskProvider>(
-      builder: (context, taskProvider, child) {
-        final focusTasks = taskProvider.focusTasks;
+    return BlocBuilder<TaskBloc, TaskState>(
+      builder: (context, taskState) {
+        final focusTasks = taskState.tasks
+            .where((task) => task.isStarred)
+            .toList();
 
         return Padding(
           padding: const EdgeInsets.all(16),
@@ -113,47 +118,54 @@ class _FocusModeScreenState extends State<FocusModeScreen>
   }
 
   Widget _buildFocusIntro() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: Provider.of<ThemeProvider>(context).primaryGradient,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.center_focus_strong,
-            size: 64,
-            color: Colors.white,
-          ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
-          const SizedBox(height: 16),
-          Text(
-            'Focus Mode',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Select your most important tasks and focus on them without distractions',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.white.withAlpha((0.9 * 255).toInt()),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    ).animate().fadeIn(delay: 200.ms, duration: 600.ms).slideY(begin: 0.2, end: 0);
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: themeState.primaryGradient,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.center_focus_strong,
+                    size: 64,
+                    color: Colors.white,
+                  ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Focus Mode',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Select your most important tasks and focus on them without distractions',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.white.withAlpha((0.9 * 255).toInt()),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )
+            .animate()
+            .fadeIn(delay: 200.ms, duration: 600.ms)
+            .slideY(begin: 0.2, end: 0);
+      },
+    );
   }
 
   Widget _buildTimeSelector() {
@@ -335,46 +347,51 @@ class _FocusModeScreenState extends State<FocusModeScreen>
   }
 
   Widget _buildFocusTimer() {
-    return AnimatedBuilder(
-      animation: _pulseController,
-      builder: (context, child) {
-        return Container(
-          width: 200 + (_pulseController.value * 20),
-          height: 200 + (_pulseController.value * 20),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: Provider.of<ThemeProvider>(context).primaryGradient,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withAlpha(
-                  ((0.3 + (_pulseController.value * 0.2)) * 255).toInt(),
-                ),
-                blurRadius: 20 + (_pulseController.value * 10),
-                spreadRadius: 5 + (_pulseController.value * 5),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return AnimatedBuilder(
+          animation: _pulseController,
+          builder: (context, child) {
+            return Container(
+              width: 200 + (_pulseController.value * 20),
+              height: 200 + (_pulseController.value * 20),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: themeState.primaryGradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(
+                      ((0.3 + (_pulseController.value * 0.2)) * 255).toInt(),
+                    ),
+                    blurRadius: 20 + (_pulseController.value * 10),
+                    spreadRadius: 5 + (_pulseController.value * 5),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '$_focusTimeMinutes:00',
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '$_focusTimeMinutes:00',
+                      style: Theme.of(context).textTheme.displayMedium
+                          ?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Focus Time',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white.withAlpha((0.9 * 255).toInt()),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Focus Time',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withAlpha((0.9 * 255).toInt()),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

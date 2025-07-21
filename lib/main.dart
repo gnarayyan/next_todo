@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'providers/task_provider.dart';
-import 'providers/theme_provider.dart';
+import 'blocs/blocs.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
 import 'screens/home_screen.dart';
@@ -26,29 +25,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        BlocProvider(create: (_) => ThemeBloc()),
+        BlocProvider(create: (_) => TaskBloc()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, themeState) {
           return MaterialApp(
             title: 'NextTodo',
             debugShowCheckedModeBanner: false,
-            theme: themeProvider.lightTheme.copyWith(
+            theme: themeState.lightTheme.copyWith(
               textTheme: GoogleFonts.interTextTheme(
-                themeProvider.lightTheme.textTheme,
+                themeState.lightTheme.textTheme,
               ),
             ),
-            darkTheme: themeProvider.darkTheme.copyWith(
+            darkTheme: themeState.darkTheme.copyWith(
               textTheme: GoogleFonts.interTextTheme(
-                themeProvider.darkTheme.textTheme,
+                themeState.darkTheme.textTheme,
               ),
             ),
-            themeMode: themeProvider.isDarkMode
-                ? ThemeMode.dark
-                : ThemeMode.light,
+            themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
@@ -58,7 +55,7 @@ class MyApp extends StatelessWidget {
               Locale('en', ''), // English
               Locale('ne', ''), // Nepali
             ],
-            locale: Locale(themeProvider.selectedLanguage),
+            locale: Locale(themeState.selectedLanguage),
             home: const SplashScreen(),
           );
         },
@@ -116,80 +113,82 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: themeProvider.backgroundGradient),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          gradient: themeProvider.primaryGradient,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context).colorScheme.primary
-                                  .withAlpha((0.3 * 255).toInt()),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(gradient: themeState.backgroundGradient),
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              gradient: themeState.primaryGradient,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Theme.of(context).colorScheme.primary
+                                      .withAlpha((0.3 * 255).toInt()),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.task_alt,
-                          size: 60,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Text(
-                        'NextTodo',
-                        style: GoogleFonts.inter(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Next generation todo app',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color: Theme.of(context).colorScheme.onSurface
-                              .withAlpha((0.7 * 255).toInt()),
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).colorScheme.primary,
+                            child: const Icon(
+                              Icons.task_alt,
+                              size: 60,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 32),
+                          Text(
+                            'NextTodo',
+                            style: GoogleFonts.inter(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Next generation todo app',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: Theme.of(context).colorScheme.onSurface
+                                  .withAlpha((0.7 * 255).toInt()),
+                            ),
+                          ),
+                          const SizedBox(height: 48),
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

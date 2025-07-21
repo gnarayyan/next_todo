@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../models/task.dart';
-import '../providers/task_provider.dart';
-import '../providers/theme_provider.dart';
+import '../blocs/blocs.dart';
 
 class TaskCard extends StatelessWidget {
   final Task task;
@@ -14,51 +13,52 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Dismissible(
-        key: Key(task.id),
-        background: _buildSwipeBackground(
-          context,
-          Colors.green,
-          Icons.check,
-          'Complete',
-          Alignment.centerLeft,
-        ),
-        secondaryBackground: _buildSwipeBackground(
-          context,
-          Colors.red,
-          Icons.delete,
-          'Delete',
-          Alignment.centerRight,
-        ),
-        onDismissed: (direction) {
-          if (direction == DismissDirection.startToEnd) {
-            taskProvider.toggleTaskCompletion(task.id);
-          } else {
-            taskProvider.deleteTask(task.id);
-            _showUndoSnackBar(context, taskProvider);
-          }
-        },
-        child: ListTile(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          contentPadding: const EdgeInsets.all(16),
-          leading: _buildLeading(themeProvider, taskProvider),
-          title: _buildTitle(context, themeProvider),
-          subtitle: _buildSubtitle(context, themeProvider),
-          trailing: _buildTrailing(themeProvider, taskProvider),
-        ),
-      ),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Dismissible(
+            key: Key(task.id),
+            background: _buildSwipeBackground(
+              context,
+              Colors.green,
+              Icons.check,
+              'Complete',
+              Alignment.centerLeft,
+            ),
+            secondaryBackground: _buildSwipeBackground(
+              context,
+              Colors.red,
+              Icons.delete,
+              'Delete',
+              Alignment.centerRight,
+            ),
+            onDismissed: (direction) {
+              if (direction == DismissDirection.startToEnd) {
+                context.read<TaskBloc>().add(ToggleTaskCompletion(task.id));
+              } else {
+                context.read<TaskBloc>().add(DeleteTask(task.id));
+                _showUndoSnackBar(context);
+              }
+            },
+            child: ListTile(
+              onTap: onTap,
+              onLongPress: onLongPress,
+              contentPadding: const EdgeInsets.all(16),
+              leading: _buildLeading(context, themeState),
+              title: _buildTitle(context, themeState),
+              subtitle: _buildSubtitle(context, themeState),
+              trailing: _buildTrailing(context, themeState),
+            ),
+          ),
+        );
+      },
     ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.1, end: 0);
   }
 
-  Widget _buildLeading(ThemeProvider themeProvider, TaskProvider taskProvider) {
+  Widget _buildLeading(BuildContext context, ThemeState themeState) {
     return GestureDetector(
-      onTap: () => taskProvider.toggleTaskCompletion(task.id),
+      onTap: () => context.read<TaskBloc>().add(ToggleTaskCompletion(task.id)),
       child: Container(
         width: 24,
         height: 24,
@@ -67,9 +67,9 @@ class TaskCard extends StatelessWidget {
           border: Border.all(
             color: task.isCompleted
                 ? Colors.green
-                : themeProvider.getPriorityColor(
+                : themeState.getPriorityColor(
                     task.priority.name,
-                    isDark: themeProvider.isDarkMode,
+                    isDark: themeState.isDarkMode,
                   ),
             width: 2,
           ),
@@ -82,7 +82,7 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildTitle(BuildContext context, ThemeState themeState) {
     return Text(
       task.title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -99,7 +99,7 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSubtitle(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildSubtitle(BuildContext context, ThemeState themeState) {
     final widgets = <Widget>[];
 
     if (task.description != null && task.description!.isNotEmpty) {
@@ -147,10 +147,7 @@ class TaskCard extends StatelessWidget {
         : const SizedBox.shrink();
   }
 
-  Widget _buildTrailing(
-    ThemeProvider themeProvider,
-    TaskProvider taskProvider,
-  ) {
+  Widget _buildTrailing(BuildContext context, ThemeState themeState) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -159,15 +156,15 @@ class TaskCard extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: themeProvider.getPriorityColor(
+            color: themeState.getPriorityColor(
               task.priority.name,
-              isDark: themeProvider.isDarkMode,
+              isDark: themeState.isDarkMode,
             ),
           ),
         ),
         const SizedBox(width: 8),
         GestureDetector(
-          onTap: () => taskProvider.toggleTaskStar(task.id),
+          onTap: () => context.read<TaskBloc>().add(ToggleTaskStar(task.id)),
           child: Icon(
             task.isStarred ? Icons.star : Icons.star_border,
             color: task.isStarred ? Colors.amber : Colors.grey,
@@ -246,13 +243,13 @@ class TaskCard extends StatelessWidget {
     return Theme.of(context).colorScheme.primary;
   }
 
-  void _showUndoSnackBar(BuildContext context, TaskProvider taskProvider) {
+  void _showUndoSnackBar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Task "${task.title}" deleted'),
         action: SnackBarAction(
           label: 'Undo',
-          onPressed: () => taskProvider.undoDeleteTask(),
+          onPressed: () => context.read<TaskBloc>().add(UndoDeleteTask()),
         ),
         duration: const Duration(seconds: 10),
       ),

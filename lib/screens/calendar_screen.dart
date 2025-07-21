@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../providers/theme_provider.dart';
-import '../providers/task_provider.dart';
+import '../blocs/blocs.dart';
 import '../widgets/task_card.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -18,17 +17,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: Provider.of<ThemeProvider>(context).backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [_buildAppBar(), _buildCalendarView(), _buildTasksList()],
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(gradient: themeState.backgroundGradient),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  _buildCalendarView(),
+                  _buildTasksList(),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -168,9 +173,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final isToday = _isSameDay(date, DateTime.now());
     final isCurrentMonth = date.month == _focusedDate.month;
 
-    return Consumer<TaskProvider>(
-      builder: (context, taskProvider, child) {
-        final tasksForDate = taskProvider.getTasksForDate(date);
+    return BlocBuilder<TaskBloc, TaskState>(
+      builder: (context, taskState) {
+        final tasksForDate = taskState.tasks
+            .where(
+              (task) =>
+                  task.dueDate != null &&
+                  task.dueDate!.year == date.year &&
+                  task.dueDate!.month == date.month &&
+                  task.dueDate!.day == date.day,
+            )
+            .toList();
         final hasEvents = tasksForDate.isNotEmpty;
 
         return GestureDetector(
@@ -233,9 +246,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildTasksList() {
     return Expanded(
-          child: Consumer<TaskProvider>(
-            builder: (context, taskProvider, child) {
-              final tasks = taskProvider.getTasksForDate(_selectedDate);
+          child: BlocBuilder<TaskBloc, TaskState>(
+            builder: (context, taskState) {
+              final tasks = taskState.tasks
+                  .where(
+                    (task) =>
+                        task.dueDate != null &&
+                        task.dueDate!.year == _selectedDate.year &&
+                        task.dueDate!.month == _selectedDate.month &&
+                        task.dueDate!.day == _selectedDate.day,
+                  )
+                  .toList();
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

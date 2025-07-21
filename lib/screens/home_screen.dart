@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../models/task.dart';
-import '../providers/task_provider.dart';
-import '../providers/theme_provider.dart';
+import '../blocs/blocs.dart';
 import '../widgets/task_card.dart';
 import '../widgets/empty_state_widget.dart';
 import 'add_task_screen.dart';
@@ -39,37 +38,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _loadTasks() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TaskProvider>(context, listen: false).loadTasks();
+      context.read<TaskBloc>().add(LoadTasks());
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: Provider.of<ThemeProvider>(context).backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildAppBar(),
-              _buildGreetingSection(),
-              _buildSearchBar(),
-              _buildTabBar(),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildTaskList(TaskFilter.today),
-                    _buildTaskList(TaskFilter.all),
-                    _buildTaskList(TaskFilter.starred),
-                  ],
-                ),
+      body: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, themeState) {
+          return Container(
+            decoration: BoxDecoration(gradient: themeState.backgroundGradient),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  _buildGreetingSection(),
+                  _buildSearchBar(),
+                  _buildTabBar(),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildTaskList(TaskFilter.today),
+                        _buildTaskList(TaskFilter.all),
+                        _buildTaskList(TaskFilter.starred),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
       floatingActionButton: _buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -122,59 +123,72 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       greeting = 'Good Night';
     }
 
-    return Consumer<TaskProvider>(
-          builder: (context, taskProvider, child) {
-            final stats = taskProvider.getTaskStats();
+    return BlocBuilder<TaskBloc, TaskState>(
+          builder: (context, taskState) {
+            return BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, themeState) {
+                final stats = taskState.taskStats;
 
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: Provider.of<ThemeProvider>(context).primaryGradient,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '$greeting! 👋',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'You have ${stats['pending']} pending tasks',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withAlpha((0.9 * 255).toInt()),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _buildStatCard('Today', stats['today']!, Colors.orange),
-                      const SizedBox(width: 12),
-                      _buildStatCard(
-                        'Completed',
-                        stats['completed']!,
-                        Colors.green,
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: themeState.primaryGradient,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
                       ),
-                      const SizedBox(width: 12),
-                      _buildStatCard('Overdue', stats['overdue']!, Colors.red),
                     ],
                   ),
-                ],
-              ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$greeting! 👋',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'You have ${stats['pending']} pending tasks',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.white.withAlpha((0.9 * 255).toInt()),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          _buildStatCard(
+                            'Today',
+                            stats['today']!,
+                            Colors.orange,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatCard(
+                            'Completed',
+                            stats['completed']!,
+                            Colors.green,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatCard(
+                            'Overdue',
+                            stats['overdue']!,
+                            Colors.red,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
           },
         )
@@ -258,10 +272,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildTaskList(TaskFilter filter) {
-    return Consumer<TaskProvider>(
-      builder: (context, taskProvider, child) {
-        taskProvider.setFilter(filter);
-        final tasks = taskProvider.tasks;
+    return BlocBuilder<TaskBloc, TaskState>(
+      builder: (context, taskState) {
+        context.read<TaskBloc>().add(SetTaskFilter(filter));
+        final tasks = taskState.filteredTasks;
 
         if (tasks.isEmpty) {
           return _buildEmptyState(filter);
@@ -270,7 +284,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         return ReorderableListView.builder(
           padding: const EdgeInsets.only(bottom: 100),
           itemCount: tasks.length,
-          onReorder: taskProvider.reorderTasks,
+          onReorder: (oldIndex, newIndex) {
+            context.read<TaskBloc>().add(ReorderTasks(oldIndex, newIndex));
+          },
           itemBuilder: (context, index) {
             final task = tasks[index];
             return TaskCard(
@@ -338,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isSearching = query.isNotEmpty;
     });
-    Provider.of<TaskProvider>(context, listen: false).setSearchQuery(query);
+    context.read<TaskBloc>().add(SetSearchQuery(query));
   }
 
   void _clearSearch() {
@@ -346,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isSearching = false;
     });
-    Provider.of<TaskProvider>(context, listen: false).clearSearch();
+    context.read<TaskBloc>().add(ClearSearch());
   }
 
   void _addTask() {
@@ -408,10 +424,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             title: Text(task.isStarred ? 'Remove from Focus' : 'Add to Focus'),
             onTap: () {
               Navigator.pop(context);
-              Provider.of<TaskProvider>(
-                context,
-                listen: false,
-              ).toggleTaskStar(task.id);
+              context.read<TaskBloc>().add(ToggleTaskStar(task.id));
             },
           ),
           ListTile(
@@ -421,10 +434,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             onTap: () {
               Navigator.pop(context);
-              Provider.of<TaskProvider>(
-                context,
-                listen: false,
-              ).toggleTaskCompletion(task.id);
+              context.read<TaskBloc>().add(ToggleTaskCompletion(task.id));
             },
           ),
           ListTile(
@@ -432,10 +442,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             title: const Text('Delete', style: TextStyle(color: Colors.red)),
             onTap: () {
               Navigator.pop(context);
-              Provider.of<TaskProvider>(
-                context,
-                listen: false,
-              ).deleteTask(task.id);
+              context.read<TaskBloc>().add(DeleteTask(task.id));
             },
           ),
         ],

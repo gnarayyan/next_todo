@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../models/task.dart';
-import '../providers/task_provider.dart';
-import '../providers/theme_provider.dart';
+import '../blocs/blocs.dart';
 
 class AddTaskScreen extends StatefulWidget {
   final Task? taskToEdit;
@@ -56,43 +55,45 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   Widget build(BuildContext context) {
     final isEditing = widget.taskToEdit != null;
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: Provider.of<ThemeProvider>(context).backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildAppBar(isEditing),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTitleField(),
-                        const SizedBox(height: 20),
-                        _buildDescriptionField(),
-                        const SizedBox(height: 20),
-                        _buildDateTimeSection(),
-                        const SizedBox(height: 20),
-                        _buildPrioritySection(),
-                        const SizedBox(height: 20),
-                        _buildOptionsSection(),
-                        const SizedBox(height: 40),
-                        _buildActionButtons(isEditing),
-                      ],
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(gradient: themeState.backgroundGradient),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildAppBar(isEditing),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTitleField(),
+                            const SizedBox(height: 20),
+                            _buildDescriptionField(),
+                            const SizedBox(height: 20),
+                            _buildDateTimeSection(),
+                            const SizedBox(height: 20),
+                            _buildPrioritySection(),
+                            const SizedBox(height: 20),
+                            _buildOptionsSection(),
+                            const SizedBox(height: 40),
+                            _buildActionButtons(isEditing),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -271,83 +272,86 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   }
 
   Widget _buildPrioritySection() {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Priority',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: TaskPriority.values.map((priority) {
-                final isSelected = _selectedPriority == priority;
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: priority != TaskPriority.values.last ? 8 : 0,
-                    ),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedPriority = priority),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? themeProvider.getPriorityColor(
-                                  priority.name,
-                                  isDark: themeProvider.isDarkMode,
-                                )
-                              : Theme.of(context).colorScheme.onSurface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: themeProvider.getPriorityColor(
-                              priority.name,
-                              isDark: themeProvider.isDarkMode,
-                            ),
-                            width: isSelected ? 2 : 1,
-                          ),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, themeState) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Priority',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: TaskPriority.values.map((priority) {
+                    final isSelected = _selectedPriority == priority;
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: priority != TaskPriority.values.last ? 8 : 0,
                         ),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isSelected
-                                    ? Colors.white
-                                    : themeProvider.getPriorityColor(
-                                        priority.name,
-                                        isDark: themeProvider.isDarkMode,
-                                      ),
+                        child: GestureDetector(
+                          onTap: () =>
+                              setState(() => _selectedPriority = priority),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? themeState.getPriorityColor(
+                                      priority.name,
+                                      isDark: themeState.isDarkMode,
+                                    )
+                                  : Theme.of(context).colorScheme.onSurface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: themeState.getPriorityColor(
+                                  priority.name,
+                                  isDark: themeState.isDarkMode,
+                                ),
+                                width: isSelected ? 2 : 1,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              priority.name.toUpperCase(),
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
                                     color: isSelected
                                         ? Colors.white
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
-                                    fontWeight: FontWeight.w600,
+                                        : themeState.getPriorityColor(
+                                            priority.name,
+                                            isDark: themeState.isDarkMode,
+                                          ),
                                   ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  priority.name.toUpperCase(),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
+                    );
+                  }).toList(),
+                ),
+              ],
+            );
+          },
         )
         .animate()
         .fadeIn(delay: 400.ms, duration: 500.ms)
@@ -466,7 +470,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   void _saveTask() {
     if (!_formKey.currentState!.validate()) return;
 
-    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final dueDateTime = _getCombinedDateTime();
 
     if (widget.taskToEdit != null) {
@@ -481,17 +484,19 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         isStarred: _isStarred,
       );
 
-      taskProvider.updateTask(updatedTask);
+      context.read<TaskBloc>().add(UpdateTask(updatedTask));
     } else {
       // Create new task
-      taskProvider.addTask(
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty
-            ? null
-            : _descriptionController.text.trim(),
-        dueDate: dueDateTime,
-        priority: _selectedPriority,
-        isStarred: _isStarred,
+      context.read<TaskBloc>().add(
+        AddTask(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+          dueDate: dueDateTime,
+          priority: _selectedPriority,
+          isStarred: _isStarred,
+        ),
       );
     }
 
